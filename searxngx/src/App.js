@@ -18,16 +18,13 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `http:/${window.location.hostname}/image-search`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query }),
-        }
-      );
+      const response = await fetch(`http:/172.16.30.100:6743/image-search`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query }),
+      });
 
       const imageData = await response.json();
       const fetchedImages = imageData?.images.map((item) => ({
@@ -52,16 +49,13 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `http:/${window.location.hostname}:6743/video-search`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query }),
-        }
-      );
+      const response = await fetch(`http:/172.16.30.100:6743/video-search`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query }),
+      });
 
       const videoData = await response.json();
       const fetchedVideos = videoData.videos.slice(0, 20);
