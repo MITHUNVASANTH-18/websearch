@@ -24,7 +24,7 @@ services:
   frontend:
     build: ./searxngx
     ports:
-      - "3000:80"
+      - "3008:80"
     networks:
       - websearch-network
     depends_on:
