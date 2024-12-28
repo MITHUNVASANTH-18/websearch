@@ -12,7 +12,7 @@ services:
   backend:
     build: ./backend
     environment:
-      - SEARXNG_URL=http://searxng:8080
+      - SEARXNG_URL=http://searxng:9080
     ports:
       - "6743:6743"
     networks:
