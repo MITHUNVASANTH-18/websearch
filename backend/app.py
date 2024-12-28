@@ -11,11 +11,11 @@ app = Flask(__name__)
 
 CORS(app)
 
-SEARXNG_URL = "http://searxng:6733/search"
+SEARXNG_URL = "http://searxng:9000/search"
 
 
 def search_searxng(query, format, engines=None):
-    base_url = "http://searxng:6733/search"
+    base_url = "http://searxng:9000/search"
     
     params = {
         "q": query,
