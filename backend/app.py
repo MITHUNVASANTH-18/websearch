@@ -7,7 +7,8 @@ import os
 import traceback
 
 load_dotenv()
-openai.api_key = "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" 
+api_key= os.getenv("OPENAI_API_KEY")
+openai.api_key = api_key
 app = Flask(__name__)
 
 CORS(app)
