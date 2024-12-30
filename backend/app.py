@@ -5,6 +5,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import traceback
+import logging
 
 load_dotenv()
 api_key= os.getenv("OPENAI_API_KEY")
@@ -15,6 +16,8 @@ CORS(app)
 
 SEARXNG_URL = "http://searxng:9000/search"
 
+# Set up logging for the app
+app.logger.setLevel(logging.DEBUG)
 
 def search_searxng(query, format, engines=None):
     base_url = "http://searxng:9000/search"
@@ -27,13 +30,13 @@ def search_searxng(query, format, engines=None):
     }
 
     try:
-        print(f"Requesting Searxng with URL: {base_url}?{params}")
+        app.logger.debug(f"Requesting Searxng with URL: {base_url}?{params}")
         response = requests.get(base_url, params=params)
         response.raise_for_status()
-        print(f"Received Searxng Response: {response.text[:500]}...")  # Printing a truncated response for debugging
+        app.logger.debug(f"Received Searxng Response: {response.text[:500]}...")  # Printing a truncated response for debugging
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Request error: {e}")
+        app.logger.error(f"Request error: {e}")
         return None
 
 
@@ -44,20 +47,8 @@ def format_query_with_openai(user_query, search):
         - Refine the user query: '{user_query}' to make it concise, clear, and focused on the most relevant results.
         - The query should be specific, avoiding ambiguity, and ensuring clarity.
         - Optimize the query to improve the relevance of the search results for various content types (text, images, videos, etc.).
-
-        Examples:
-        1. User query: "ANATOMY "
-        Optimized query: "what is human anatomy"
-
-        2. User query: "structure of body"
-        Optimized query: "human body structure"
-
-        3. User query: "brain"
-        Optimized query: "images of brain"
-
-        User query: '{user_query}'
         """
-        print(f"Sending query to OpenAI for optimization: {user_query}")
+        app.logger.debug(f"Sending query to OpenAI for optimization: {user_query}")
         response = openai.chat.completions.create(
             model="gpt-4o-mini",  # This is the model name you are using.
             messages=[
@@ -69,16 +60,16 @@ def format_query_with_openai(user_query, search):
         )
 
         optimized_query = response.choices[0].message.content
-        print(f"Optimized query received from OpenAI: {optimized_query}")
+        app.logger.debug(f"Optimized query received from OpenAI: {optimized_query}")
 
         # Extract optimized query from response
         parts = optimized_query.split(":")
         result = parts[1].strip().strip('"')
-        print(f"Extracted Optimized Query: {result}")
+        app.logger.debug(f"Extracted Optimized Query: {result}")
         return result
 
     except Exception as e:
-        print(f"Error in query formatting: {e}")
+        app.logger.error(f"Error in query formatting: {e}")
         traceback.print_exc()  # Provides more detailed traceback information
         return user_query
 
@@ -94,13 +85,13 @@ def image_search():
     search = "images"
     
     try:
-        print(f"Received image search query: {query}")
+        app.logger.debug(f"Received image search query: {query}")
         formatted_query = format_query_with_openai(query, search)
 
         search_results = search_searxng(formatted_query, search, engines=['bing images', 'google images'])
 
         if not search_results or 'results' not in search_results:
-            print(f"Error: No results returned from Searxng: {search_results}")
+            app.logger.error(f"Error: No results returned from Searxng: {search_results}")
             return jsonify({"message": "No results returned from Searxng"}), 500
 
         image_results = [
@@ -116,12 +107,12 @@ def image_search():
         ]
 
         top_images = sorted(image_results, key=lambda x: x['score'], reverse=True)[:10]
-        print(f"Top 10 Image Results: {top_images}")
+        app.logger.debug(f"Top 10 Image Results: {top_images}")
 
         return jsonify({"images": top_images}), 200
 
     except Exception as e:
-        print(f"Error during search: {str(e)}")
+        app.logger.error(f"Error during search: {str(e)}")
         traceback.print_exc()  # Detailed error traceback
         return jsonify({"message": f"Error fetching results from Searxng: {str(e)}"}), 500
 
@@ -137,13 +128,13 @@ def video_search():
     query = data['query']
     
     try:
-        print(f"Received video search query: {query}")
+        app.logger.debug(f"Received video search query: {query}")
         formatted_query = format_query_with_openai(query, search)
 
         search_results = search_searxng(formatted_query, search, engines=["youtube"])
 
         if not search_results:
-            print(f"Error: No results returned from Searxng: {search_results}")
+            app.logger.error(f"Error: No results returned from Searxng: {search_results}")
             return jsonify({"message": "Error fetching results"}), 500
 
         video_results = []
@@ -158,7 +149,7 @@ def video_search():
         return jsonify({"videos": video_results}), 200
 
     except Exception as e:
-        print(f"Error fetching results from Searxng: {str(e)}")
+        app.logger.error(f"Error fetching results from Searxng: {str(e)}")
         traceback.print_exc()  # Detailed error traceback
         return jsonify({"message": "Error fetching results from Searxng"}), 500
 
