@@ -47,19 +47,34 @@ def search_searxng(query, format, engines=None):
 def format_query_with_openai(user_query, search):
     try:
         prompt = f"""
-        You are optimizing a search query for the Searxng engine to retrieve the most relevant results.
-        - Refine the user query: '{user_query}' to make it concise, clear, and focused on the most relevant results.
-        - The query should be specific, avoiding ambiguity, and ensuring clarity.
-        - Optimize the query to improve the relevance of the search results for various content types (text, images, videos, etc.).
-           Examples:
-        1. User query: "ANATOMY "
-        Optimized query: "what is human anatomy"
-        2. User query: "structure of body"
-        Optimized query: "human body structure"
-        3. User query: "brain"
-        Optimized query: "images of brain"
-        User query: '{user_query}'
-        """
+You are refining a search query for the Searxng engine to maximize relevance and clarity of results. 
+
+Your task:
+1. Refine the given user query: '{user_query}' to make it concise, specific, and focused on retrieving the most relevant results across content types (text, images, videos, etc.).
+2. Ensure the refined query is unambiguous and aligns with the user's intent.
+
+Instructions:
+- Use clear and concise language to optimize the query for clarity and relevance.
+- Adapt the query for different content types when appropriate.
+- Make the query independent of any prior context or conversation while staying relevant.
+
+Examples:
+1. User query: "ANATOMY"
+Optimized query: "What is human anatomy?"
+2. User query: "structure of body"
+Optimized query: "Human body structure"
+3. User query: "brain"
+Optimized query: "Images of the human brain"
+
+Additional Task:
+You will also be provided with a conversation and a follow-up question. Your job is to:
+- Rephrase the follow-up question into a standalone question that can be used by an LLM for image search.
+- Ensure the rephrased question aligns with the context and intent of the conversation.
+
+User query: '{user_query}'
+Conversation and follow-up question provided below.
+"""
+
         app.logger.debug(f"Sending query to OpenAI for optimization: {user_query}")
         response = openai.chat.completions.create(
             model="gpt-4o-mini",  # This is the model name you are using.
