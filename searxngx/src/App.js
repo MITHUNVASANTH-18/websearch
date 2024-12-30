@@ -49,7 +49,7 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`http://172.16.30.100:6743/video-search`, {
+      const response = await fetch(`http://localhost:6743/video-search`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
