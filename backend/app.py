@@ -29,7 +29,7 @@ def search_searxng(query, format, engines=None):
     params = {
         "q": query,
         "categories": format,
-        "engines": ",".join(engines) if engines else "google",
+        "engines": ",".join(engines) if engines else "google images",
         "format": "json",
         "time_range": "year"
     }
@@ -115,16 +115,16 @@ def image_search():
             return jsonify({"message": "No results returned from Searxng"}), 500
 
         image_results = [
-            {
-                "img_src": result.get('img_src'),
-                "url": result.get('url'),
-                "title": result.get('title'),
-                "score": result.get('score', 0)
-            }
-            for result in search_results.get('results', [])
-            if result.get('category') == 'images' and 'img_src' in result and 'url' in result
-            and all(excluded not in result.get('url', '') for excluded in ['artic.edu', 'artic', 'youtube', 'flickr'])
-        ]
+    {
+        "img_src": result.get('img_src'),
+        "url": result.get('url'),
+        "title": result.get('title'),
+        "score": result.get('score', 0)
+    }
+    for result in search_results.get('results', [])
+    if result.get('category') == 'images'
+]
+
 
         top_images = sorted(image_results, key=lambda x: x['score'], reverse=True)[:10]
         app.logger.debug(f"Top 10 Image Results: {top_images}")
