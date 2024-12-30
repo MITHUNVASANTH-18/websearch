@@ -129,7 +129,7 @@ def image_search():
         top_images = sorted(image_results, key=lambda x: x['score'], reverse=True)[:10]
         app.logger.debug(f"Top 10 Image Results: {top_images}")
 
-        return jsonify({"images": top_images}), 200
+        return jsonify({"images": image_results}), 200
 
     except Exception as e:
         app.logger.error(f"Error during search: {str(e)}")
