@@ -30,7 +30,8 @@ def search_searxng(query, format, engines=None):
         "q": query,
         "categories": format,
         "engines": ",".join(engines) if engines else "google",
-        "format": "json"
+        "format": "json",
+        "time_range": "year"
     }
 
     try:
