@@ -36,7 +36,7 @@ def search_searxng(query, format, engines=None):
     try:
         app.logger.debug(f"Requesting Searxng with URL: {base_url}?{params}")
         response = requests.get(base_url, params=params,headers=headers)
-        # response.raise_for_status()
+        response.raise_for_status()
         app.logger.debug(f"Received Searxng Response: {response.text[:500]}...")  # Printing a truncated response for debugging
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -51,6 +51,14 @@ def format_query_with_openai(user_query, search):
         - Refine the user query: '{user_query}' to make it concise, clear, and focused on the most relevant results.
         - The query should be specific, avoiding ambiguity, and ensuring clarity.
         - Optimize the query to improve the relevance of the search results for various content types (text, images, videos, etc.).
+           Examples:
+        1. User query: "ANATOMY "
+        Optimized query: "what is human anatomy"
+        2. User query: "structure of body"
+        Optimized query: "human body structure"
+        3. User query: "brain"
+        Optimized query: "images of brain"
+        User query: '{user_query}'
         """
         app.logger.debug(f"Sending query to OpenAI for optimization: {user_query}")
         response = openai.chat.completions.create(
