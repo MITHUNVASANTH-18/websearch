@@ -21,7 +21,11 @@ app.logger.setLevel(logging.DEBUG)
 
 def search_searxng(query, format, engines=None):
     base_url = "http://searxng:8080/search"
-    
+    headers ={
+        'content-type':'application/json',
+        'referer':'http://172.16.30.100:3008/',
+        'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+    }
     params = {
         "q": query,
         "categories": format,
