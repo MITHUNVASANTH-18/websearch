@@ -14,13 +14,13 @@ app = Flask(__name__)
 
 CORS(app)
 
-SEARXNG_URL = "http://searxng:9000/search"
+SEARXNG_URL = "http://searxng:8080/search"
 
 # Set up logging for the app
 app.logger.setLevel(logging.DEBUG)
 
 def search_searxng(query, format, engines=None):
-    base_url = "http://searxng:9000/search"
+    base_url = "http://searxng:8080/search"
     
     params = {
         "q": query,
