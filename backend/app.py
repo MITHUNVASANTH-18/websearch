@@ -35,7 +35,7 @@ def search_searxng(query, format, engines=None):
 
     try:
         app.logger.debug(f"Requesting Searxng with URL: {base_url}?{params}")
-        response = requests.get(base_url, params=params)
+        response = requests.get(base_url, params=params,headers=headers)
         # response.raise_for_status()
         app.logger.debug(f"Received Searxng Response: {response.text[:500]}...")  # Printing a truncated response for debugging
         return response.json()
