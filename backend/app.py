@@ -14,8 +14,7 @@ import json
 db = connect(
     db='prompt',
     host='mongodb+srv://mithunvasanthr:1234@prompt.xjcb6.mongodb.net/prompt?retryWrites=true&w=majority',
-    ssl=True,
-    ssl_cert_reqs=False
+    ssl=True
 )
 
 print(db)
