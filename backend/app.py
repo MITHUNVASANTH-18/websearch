@@ -64,21 +64,21 @@ def format_query_with_openai(user_query ):
         if not prompt_template:
             raise ValueError("Prompt not found in API response")
 
-        prompt = f"""
+        promptt = f"""
 {prompt_template}
 
 Follow up question: {user_query}
 Rephrased question:
 """
 
-        app.logger.debug(f"Generated prompt for OpenAI: {prompt}")
+        app.logger.debug(f"Generated prompt for OpenAI: {promptt}")
 
 
         response = openai.chat.completions.create(
             model="gpt-4o-mini", 
             messages=[
                 {"role": "system", "content": "You are a query optimization assistant."},
-                {"role": "user", "content": prompt},
+                {"role": "user", "content": promptt},
             ],
             max_tokens=1000,
             temperature=0.7,
