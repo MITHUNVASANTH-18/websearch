@@ -11,7 +11,13 @@ from mongoengine import connect
 from routes.prompt_routes import prompt_Bp
 from schema.prompt_schema import prompt
 import json
-db=connect(db='prompt',host='mongodb+srv://mithunvasanthr:1234@prompt.xjcb6.mongodb.net/')
+db = connect(
+    db='prompt',
+    host='mongodb+srv://mithunvasanthr:1234@prompt.xjcb6.mongodb.net/prompt?retryWrites=true&w=majority',
+    ssl=True,
+    ssl_cert_reqs=False
+)
+
 print(db)
 load_dotenv()
 api_key= os.getenv("OPENAI_API_KEY")
