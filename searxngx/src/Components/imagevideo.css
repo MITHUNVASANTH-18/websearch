@@ -61,4 +61,6 @@
     text-align: center;
     color: gray;
   }
-  
+  .promptpage{
+    display: none;
+  }

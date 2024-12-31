@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Backdrop, CircularProgress, TextField, Button } from "@mui/material";
 import "./imagevideo.css";
+import PromptPage from "./PromptPage";
 function ImageVideoPage() {
   const { state } = useLocation();
   const prompt = state?.prompt || "";
@@ -79,6 +80,9 @@ function ImageVideoPage() {
 
   return (
     <div className='App'>
+      <div className='promptpage'>
+        <PromptPage />
+      </div>
       <div className='search-container'>
         <h2>Search for Images and Videos</h2>
 
