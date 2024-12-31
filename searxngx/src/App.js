@@ -7,8 +7,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path='/' element={<PromptPage />} />
-        <Route path='/images-videos' element={<ImageVideoPage />} />
+        <Route path='/' element={<ImageVideoPage />} />
+        <Route path='/images-videos' element={<PromptPage />} />
       </Routes>
     </Router>
   );
