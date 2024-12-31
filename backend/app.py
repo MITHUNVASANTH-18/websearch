@@ -6,7 +6,13 @@ from dotenv import load_dotenv
 import os
 import traceback
 import logging
-
+import mongoengine
+from mongoengine import connect
+from routes.prompt_routes import prompt_Bp
+from schema.prompt_schema import prompt
+import json
+db=connect(db='prompt',host='mongodb+srv://mithunvasanthr:1234@prompt.xjcb6.mongodb.net/')
+print(db)
 load_dotenv()
 api_key= os.getenv("OPENAI_API_KEY")
 openai.api_key = api_key
@@ -16,9 +22,8 @@ CORS(app)
 
 SEARXNG_URL = "http://searxng:8080/search"
 
-# Set up logging for the app
 app.logger.setLevel(logging.DEBUG)
-
+app.register_blueprint(prompt_Bp,url_prefix='/app')
 def search_searxng(query, format, engines=None):
     base_url = "http://searxng:8080/search"
     headers ={
@@ -31,68 +36,67 @@ def search_searxng(query, format, engines=None):
         "categories": format,
         "engines": ",".join(engines) if engines else "google images",
         "format": "json",
-        "time_range": "year"
+        "time_range": "year",
+         "safe_search": "1"
     }
 
     try:
         app.logger.debug(f"Requesting Searxng with URL: {base_url}?{params}")
         response = requests.get(base_url, params=params,headers=headers)
         response.raise_for_status()
-        app.logger.debug(f"Received Searxng Response: {response.text[:500]}...")  # Printing a truncated response for debugging
+        app.logger.debug(f"Received Searxng Response: {response.text[:500]}...") 
         return response.json()
     except requests.exceptions.RequestException as e:
         app.logger.error(f"Request error: {e}")
         return None
 
 
-def format_query_with_openai(user_query, search):
+def format_query_with_openai(user_query ):
     try:
+        prompt_id = "67739dbfd14c8c402b258d77" 
+        promptdata = prompt.objects(id=prompt_id).first()
+        if promptdata:
+            promptdata = promptdata.to_json()
+            promptdata = json.loads(promptdata)
+
+        api_data = promptdata.json()
+        prompt_template = api_data.get("prompt", "")
+        if not prompt_template:
+            raise ValueError("Prompt not found in API response")
+
         prompt = f"""
-You will be given a conversation below and a follow up question. You need to rephrase the follow-up question so it is a standalone question that can be used by the LLM to search the web for images.
-You need to make sure the rephrased question agrees with the conversation and is relevant to the conversation.
-
-Example:
-1. Follow up question: What is a cat?
-Rephrased: A cat
-
-2. Follow up question: What is a car? How does it works?
-Rephrased: Car working
-
-3. Follow up question: How does an AC work?
-Rephrased: AC working
-
+{prompt_template}
 
 Follow up question: {user_query}
 Rephrased question:
-`;
-
 """
 
-        app.logger.debug(f"Sending query to OpenAI for optimization: {user_query}")
+        app.logger.debug(f"Generated prompt for OpenAI: {prompt}")
+
+
         response = openai.chat.completions.create(
-            model="gpt-4o-mini",  # This is the model name you are using.
+            model="gpt-4o-mini", 
             messages=[
                 {"role": "system", "content": "You are a query optimization assistant."},
                 {"role": "user", "content": prompt},
             ],
             max_tokens=1000,
-            temperature=0.7
+            temperature=0.7,
         )
 
         optimized_query = response.choices[0].message.content
         app.logger.debug(f"Optimized query received from OpenAI: {optimized_query}")
 
-        # Extract optimized query from response
         parts = optimized_query.split(":")
-        result = parts[1].strip().strip('"')
+        result = parts[1].strip().strip('"') if len(parts) > 1 else optimized_query.strip()
         app.logger.debug(f"Extracted Optimized Query: {result}")
+
         return result
 
     except Exception as e:
         app.logger.error(f"Error in query formatting: {e}")
-        traceback.print_exc()  # Provides more detailed traceback information
-        return user_query
-
+        traceback.print_exc()
+        return user_query 
 
 @app.route('/image-search', methods=['POST'])
 def image_search():
@@ -106,7 +110,7 @@ def image_search():
     
     try:
         app.logger.debug(f"Received image search query: {query}")
-        formatted_query = format_query_with_openai(query, search)
+        formatted_query = format_query_with_openai(query)
 
         search_results = search_searxng(formatted_query, search, engines=['bing images', 'google images'])
 
@@ -127,7 +131,7 @@ def image_search():
         ]
 
         top_images = sorted(image_results, key=lambda x: x['score'], reverse=True)[:10]
-        app.logger.debug(f"Top 10 Image Results: {top_images}")
+        # app.logger.debug(f"Top 10 Image Results: {top_images}")
 
         return jsonify({"images": image_results}), 200
 
@@ -149,7 +153,7 @@ def video_search():
     
     try:
         app.logger.debug(f"Received video search query: {query}")
-        formatted_query = format_query_with_openai(query, search)
+        formatted_query = format_query_with_openai(query)
 
         search_results = search_searxng(formatted_query, search, engines=["youtube"])
 
