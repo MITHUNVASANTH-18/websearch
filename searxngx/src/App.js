@@ -8,7 +8,7 @@ function App() {
     <Router>
       <Routes>
         <Route path='/' element={<ImageVideoPage />} />
-        <Route path='/images-videos' element={<PromptPage />} />
+        <Route path='/prompt' element={<PromptPage />} />
       </Routes>
     </Router>
   );
