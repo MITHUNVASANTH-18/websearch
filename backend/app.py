@@ -54,8 +54,7 @@ def search_searxng(query, format, engines=None):
         app.logger.error(f"Request error: {e}")
         return None
 
-
-def format_query_with_openai(user_query ):
+def format_query_with_openai(user_query):
     try:
         prompt_id = "67739dbfd14c8c402b258d77" 
         promptdata = prompt.objects(id=prompt_id).first()
@@ -63,7 +62,8 @@ def format_query_with_openai(user_query ):
             promptdata = promptdata.to_json()
             promptdata = json.loads(promptdata)
 
-        api_data = promptdata.json()
+        # No need to call .json() here since promptdata is already a dictionary
+        api_data = promptdata
         prompt_template = api_data.get("prompt", "")
         if not prompt_template:
             raise ValueError("Prompt not found in API response")
